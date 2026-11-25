@@ -1,0 +1,207 @@
+There's a part inside almost every AI that can see. And a new paper says you can stop paying for it.
+
+It's called the vision encoder. One popular version, SigLIP two, trained on forty billion image and text pairs. That's about ten trillion image tokens, spent on one piece.
+
+So Meta and N Y U trained over two hundred models, from scratch, with the same data and the same budget, to find out if that piece is needed.
+
+The answer has a twist. I'll break it down in three simple tests.
+
+Say you want to build an AI that can look at a picture and answer questions about it. Almost everyone does the same thing. Take an image network that someone already trained. Bolt it onto a language model. Train the two together. It's the default.
+
+But lately, a few labs broke the pattern. Some trained that image part from scratch, at the same time as the language model. Some deleted it, and fed raw pieces of the picture straight in. That's three recipes, and three different stories about what the image part is for.
+
+But you can't find out which story is true by comparing those models. They use different data. Different language models. Different compute. If ten things change at once, you can't tell which one mattered.
+
+That's why this paper is different. The authors fixed everything, and changed one thing at a time.
+
+By the end of this video, you'll know which part of the vision encoder is worth paying for, which part is waste, and where to spend your parameters if you build one yourself.
+
+But first, we need to start somewhere most videos skip. What does a language model see when you hand it a picture? The answer is simpler than you think. And once you see it, the paper gets easy to follow.
+
+The simplest way to give a language model eyes takes about a minute to explain. And it still works. Sort of. So let's build it from nothing.
+
+If this part feels fuzzy, the rest of the video will sound like noise. So we start at the bottom.
+
+A language model doesn't read words. It reads a line of vectors. A vector is just a list of numbers. When you type a sentence, it gets cut into tokens, and each token becomes one vector. That's the model's entire world. A line of vectors.
+
+So how do you turn a picture into that same kind of line?
+
+A picture is a grid of pixels. Each pixel is three numbers: red, green, blue. Even a small two hundred twenty-four by two hundred twenty-four photo has over fifty thousand pixels. Far too many to feed in one by one.
+
+So you do what you'd do with a long book. You cut it into pages.
+
+Cut the image into small squares, fourteen pixels on each side. You get sixteen squares across and sixteen down. That's two hundred fifty-six squares.
+
+Each square holds fourteen times fourteen pixels, with three colors each. That's five hundred eighty-eight numbers.
+
+Now push each square through one simple multiplication, so it comes out as a vector the same size as a text vector. Done. You have two hundred fifty-six image tokens. Put them in front of the text, and the language model reads them like words.
+
+That's a vision-language model. The whole thing.
+
+Engineers call those squares patches. They call that multiplication a patch embedding. And a model that sees this way, with nothing else in front of it, is called encoder-free. Adept's Fuyu model worked like this back in twenty twenty-three.
+
+And it works. But look at what you just asked the model to do. Those weights were built to predict the next word. Now, in the very first layers, they also have to work out that these five hundred eighty-eight numbers are an edge. That the next ones are a curve. That a hundred squares together make a bicycle.
+
+That's a lot to ask of one set of weights. So almost everyone did the next obvious thing. They hired a specialist.
+
+And that specialist comes with three things attached. The paper pulls them apart.
+
+This is where the paper's idea starts. Picture a team of writers who need help with photos. So they hire a photo expert.
+
+That expert is the vision encoder. In real models, it's a second neural network. It takes the patches in, and hands better image tokens to the language model. Most often it's a vision transformer, which is the same machine as a language model, just fed patches instead of words. It gets trained first, on its own, on huge piles of images with captions. CLIP and SigLIP are the famous ones. In the early days, labs froze it, like a fixed camera. Later, they let it keep learning. But that first training stage never went away.
+
+Look at what that hire brings. Three things, in one package.
+
+One. What he learned before he ever met your team. Years of work on other projects. The paper calls this the visual prior.
+
+Two. His own desk. A set of parameters that only image tokens ever touch. Text never goes near them. The paper calls this dedicated vision capacity.
+
+Three. Where he sits. He works in a separate room, and finishes before anything reaches the writers. The paper calls this pre-fusion placement. Fusion is the moment where image tokens and text tokens first mix. Pre-fusion means before that moment.
+
+A pretrained encoder has all three. An encoder trained from scratch has the desk and the room, but no past experience. And an encoder-free model has none of them.
+
+And the first one is the expensive one. Remember the number from the start. Ten trillion image tokens for SigLIP two. That's the same scale as the trillions of text tokens we use to train language models.
+
+That leaves a question nobody could answer cleanly. Out of the three, which one does the work?
+
+You can't answer that by comparing models. You have to run a fair fight. And the way they set it up is what makes the rest believable.
+
+Before I show you any results, you need to know why you can trust them. Because there's a trap in this kind of test, and it's easy to fall into.
+
+If the test isn't fair, the numbers mean nothing.
+
+The trap is the budget. Say a pretrained encoder and a from-scratch encoder end up with the same score. Looks like a tie. But in the wild, the pretrained one had trillions of tokens of training before the race even started. Most comparisons don't count that.
+
+So the paper uses one number. Lifetime compute. Add up the compute for every stage that built the final model. The language model's training. The encoder's pretraining. The multimodal training. One total. Every recipe gets the same total.
+
+Then they removed every other difference.
+
+Everything trained from scratch. Even the language model. Same text data. Same image and caption data. Same language model design, a Qwen three style transformer, at one point seven billion and four billion parameters, and later a ladder of sizes from zero point six to six point four billion. Same optimizer. Same zero point four billion parameter vision transformer for every recipe that has an encoder. Same images, two hundred twenty-four by two hundred twenty-four, two hundred fifty-six tokens each.
+
+Four recipes: the pretrained encoder, the from-scratch encoder, encoder-free, and a fourth one I'm saving for later. It's the one you'll want to steal.
+
+How do they score them? Think of it as an exam. Every model first gets the same short course on following instructions about images. That's called instruction tuning. Then it sits sixteen image tests, in four groups: general questions, knowledge, reading text and charts, and tasks like counting and judging depth. The average of those is one grade. The paper calls it average V Q A, short for visual question answering. They also run twelve language tests, to check the model didn't forget how to read.
+
+Over two hundred runs. That lets us test each part, one at a time. Three tests. Test one is about the expensive part.
+
+Test one is about the money. And the result sounds wrong the first time you hear it.
+
+If the result is real, you can delete an entire stage from your training pipeline.
+
+The question is simple. Does the vision encoder need training of its own, before it meets the language model? In our story: if the photo expert gets ten years of experience first, does the team do better than if he learns on the job?
+
+They pretrained encoders four ways. A CLIP-style one, called MetaCLIP, which learns by matching images to their captions. A self-supervised one, called Web S S L, which learns from images alone, with no captions. And two captioning ones, Cap and CapPa, which learn by writing the caption for each image. Same pretraining compute for each. Then they compared all of them to an encoder trained from scratch, together with the language model.
+
+Take the one point seven billion model, with the same total budget. When pretraining used a small slice of the budget, up to fifteen percent, every pretrained encoder tied with the from-scratch one. A tie. When pretraining took sixty percent, the scores fell clearly below. So pretraining either did nothing, or it hurt.
+
+You might say that's not fair. You charged them for the pretraining. Fine. Make it free. Don't count it at all.
+
+So they locked the multimodal training in place, and pretrained MetaCLIP for longer and longer, up to about six times more compute. The encoder got better at its own job. On a standard image recognition test, its accuracy went from eighty point four percent to eighty-four point four percent. And the score on image questions? It was highest after the shortest pretraining. And the from-scratch encoder matched it.
+
+A better image classifier. No better at answering questions about images.
+
+There's more. Of the four pretrained encoders, Web S S L had the lowest recognition score. After training with the language model, it had the best question score of the four.
+
+Why? Think about what pretraining teaches. It teaches the encoder to answer a different question. What's in this image? Which caption matches? Your model's job is different. Read this chart. Find that small text. Count these objects.
+
+The authors also tried starting from an already trained language model, the way most teams work. One explanation: a from-scratch encoder learns features that fit that language model from its very first update. A CLIP encoder has to be reshaped by a language model that already leans on text. In that setup, even a free MetaCLIP encoder fell behind, mostly on reading text, charts, and vision-heavy questions.
+
+One more detail, for anyone who likes to cut corners. They tried teaching the model language first, and adding images later. Starting images a quarter of the way in dropped the image score from about forty-two point five to about thirty-five. If you want it to see, start from the first update.
+
+So test one says you can fire the training. The tempting next move is to fire the whole specialist. Delete the encoder. Feed in patches, like we did in part one.
+
+That's where the paper turns.
+
+This next test is the one that should change how you design your next model.
+
+If you drop the encoder, you save compute and a whole component. But you might be dropping the only part that mattered.
+
+The question: does a model need a desk that only image tokens use?
+
+Encoder-free against the from-scratch encoder. Same budget. Same data. At one point seven billion and four billion parameters.
+
+Encoder-free lost. On the image benchmarks, thirty-nine point zero against forty-four point four. The biggest hole was reading text and charts: twenty-five point two against thirty-eight point two. The language scores stayed about the same.
+
+The obvious objection: the encoder adds zero point four billion parameters. Of course it wins. It's bigger.
+
+So they gave the encoder-free model the same extra parameters. Wider layers. Deeper layers. Both. Same count, added to the shared backbone. The image score? It stayed flat, around thirty-nine, right where it started. The language score went up a little, since text uses those parameters too. But the image score didn't move.
+
+Same parameters, put somewhere else, worth much more.
+
+Another objection. Maybe the patch embedding is too weak. Remember, it's one multiplication. So they tried richer ones: a two-layer version, and a small four-layer network. At this image size, neither came close. One exception: when they squeezed much bigger images into the same two hundred fifty-six tokens, the small network caught up.
+
+And this holds as models grow. Across five sizes, from zero point six to six point four billion parameters, encoder-free needed about three times the compute to reach the encoder's score.
+
+You can see the same story in the real world. The paper points out that Thinking Machines released Inkling as an encoder-free model. Its successor, Inkling two Small, uses a two hundred ninety-two million parameter vision encoder.
+
+One more note, because some of you know the earlier scaling-law study that found encoder-free models can match encoders. This paper disagrees, and traces the gap to two choices in that setup. The encoder may have been trained too gently, with a learning rate that was too low. And they blended the text, mixed, and caption scores into one number, which hides the vision signal.
+
+So now we have a puzzle. Test one says the training is waste. Test two says the vision parameters matter. But does that desk have to be a separate network, running before the language model even starts? Because that has a cost too. And you pay it every time a user sends a picture.
+
+Test three is the one you can build on. It's a design you can use.
+
+A separate encoder has to finish before the language model can begin. That's a wait, built into every image request.
+
+So the question is about the room. Does the desk have to sit in a separate room? Or can it sit inside the main office?
+
+Quick reminder of what happens inside a language model. It's a stack of layers. In each layer, tokens first look at each other. That step is called attention. Then each token gets processed on its own by a small network, the feed-forward network, or F F N. In every layer, text tokens and image tokens go through the same weights.
+
+Here's their trick. Remember the expert's desk? Instead of a separate room, put the desk inside the main office. In a few layers, add a second set of weights, a desk that only image tokens sit at. For an image token, the layer's output is the shared output, plus the output of this extra desk. For a text token, the desk is switched off.
+
+One extra term, with a light switch. M is the switch: one for image tokens, zero for text. The extra desk starts empty, set to zero, so at step one the model behaves exactly like the plain one. And text-only inputs get processed exactly as before. The full version also adds a vision-only desk to the attention step, but the idea is the same.
+
+They call it in-fusion. The desk moves out of the separate room and into the main office. No separate network in front. Extra capacity, inside the model. And they size it to match the encoder: zero point four billion vision-only parameters. So the only thing that changes is where the capacity lives.
+
+Now, pause the video and guess. Picture the model's twenty-eight layers as twenty-eight floors, with the raw pixels walking in on floor one. The desk can go in four places. A thin slice on every floor. Eight floors spread out. The top eight. Or the bottom eight. Pick one.
+
+Thin slice on every floor: thirty-nine point four. Spread out: thirty-seven point six. Top eight: thirty-five point one. Encoder-free scored thirty-nine point zero. So none of those did any better than encoder-free.
+
+Bottom eight: forty-five point zero. The from-scratch encoder: forty-four point four.
+
+Early, or nothing.
+
+Why early? The authors suspect image tokens gain the most while they're still close to raw pixels. And when they looked inside the models, in-fusion changed image tokens mostly in those first eight blocks, and barely after that.
+
+Second check. Does it have to be vision-only? They gave the same parameters in those first eight layers to every token. Making the shared network bigger: forty point one. A separate desk used by everyone: forty-two point three. A desk for image tokens only: forty-five point zero. They suspect a vision-only desk gives image tokens processing of their own, without competing with text for the same weights. The desk has to belong to the image tokens.
+
+And it scales. From zero point six to six point four billion parameters, in-fusion tracks the encoder. Encoder-free trails at every size.
+
+Next, how most of us work: starting from a pretrained language model. They pretrained a one point seven billion model on a trillion text tokens, then added vision. In-fusion, a close cousin that copies the bottom eight floors for image tokens, and the from-scratch encoder all landed together. A heavier design, a full separate copy of every floor for vision, fell behind, even with more than three times the vision-only parameters. More capacity didn't help. Where it sat did.
+
+On to speed.
+
+They measured how long a user waits for the first word of the answer. Engineers call it time to first token. One H two hundred GPU, sixteen requests at once, each with an image and a short text prompt. In-fusion is clearly faster than the separate encoder, at about the same image score. There's no encoder to wait for. Encoder-free is fastest, but it's the one that loses on quality. In training, in-fusion ran as fast as encoder-free. The encoder recipe was about three percent slower at four billion.
+
+One catch the authors point out. If your server groups many requests into one batch, which most do, it's less clean. In-fusion's vision modules ride along in the same pass as the text-only requests, while a separate encoder only slows down the image requests. So measure it in your own stack.
+
+Before you go delete SigLIP from your repo, you need to hear what this paper does not say.
+
+One. Their pretrained encoders only saw the same images as everything else. A released encoder trained on far more data might still help. The authors say their results don't rule that out.
+
+Two. These are dense models, up to six point four billion parameters. Dense means every token uses all the weights. Mixture-of-experts, where each token only visits a few specialist sub-networks, is untested.
+
+Three. Training images are small, two hundred twenty-four by two hundred twenty-four. Higher resolution and text-heavy data are left for later.
+
+Four. The data mix was tuned on the from-scratch encoder at one point seven billion. Mixes tuned for each recipe are still open.
+
+So if you're fine-tuning a released model with SigLIP inside, nothing here tells you to rip it out.
+
+But if you're designing a model, this gives you four rules.
+
+If you train a vision-language model end to end, stop budgeting for a separate encoder pretraining stage, and start images from the first update.
+
+If you want to drop the encoder, don't just delete it. Take its parameter budget and spend it as vision-only weights in the first layers.
+
+If you compare vision encoders, don't trust recognition scores to predict how well a model answers questions. Test on reading text, charts, and the tasks you care about.
+
+And if you serve images, measure time to first token with your own mix of requests.
+
+The authors' own conclusion is to train these models end to end, as one system, instead of gluing together parts built for different goals.
+
+The part we were paying for was never the part doing the work.
+
+But there's one thing I haven't told you.
+
+Everything you just saw was tested on dense models. The authors say the most promising next step is mixture-of-experts, where each expert could host this vision-only capacity in a natural way. They leave that for future work. That's where this idea gets interesting.
+
+In this next video, I break down how mixture-of-experts routes tokens, and where a vision-only expert would fit. Click it now, and I'll see you there.

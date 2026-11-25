@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Unbundling Multimodal Vision Encoding — preview</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23282A36'/%3E%3Ccircle cx='8' cy='8' r='3' fill='%238BE9FD'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./public/fonts/local-fonts.css" />
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="shell" class="shell">
+    <canvas id="stage" width="1920" height="1080" aria-label="Animated explainer preview"></canvas>
+    <div id="poster" class="poster">
+      <button id="posterPlay" class="poster-play" aria-label="Play">
+        <svg viewBox="0 0 64 64" width="66" height="66" aria-hidden="true">
+          <circle cx="32" cy="32" r="31" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".35"/>
+          <path d="M26 21.5 45 32 26 42.5Z" fill="currentColor"/>
+        </svg>
+        <span>Play</span>
+      </button>
+    </div>
+    <div id="ui" class="ui">
+      <div class="scrub-wrap">
+        <div id="chapters" class="chapters"></div>
+        <input id="scrub" class="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" />
+        <div id="hoverTime" class="hover-time"></div>
+      </div>
+      <div class="bar">
+        <div class="bar-left">
+          <button id="playBtn" class="icon-btn" aria-label="Play or pause">
+            <svg class="i-play" viewBox="0 0 24 24" width="22" height="22"><path d="M7 4.5 20 12 7 19.5Z" fill="currentColor"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" width="22" height="22"><rect x="5.5" y="4.5" width="4.2" height="15" rx="1" fill="currentColor"/><rect x="14.3" y="4.5" width="4.2" height="15" rx="1" fill="currentColor"/></svg>
+          </button>
+          <div class="time"><span id="timeNow">0:00</span><span class="dim">/</span><span id="timeTotal">0:00</span></div>
+        </div>
+        <div class="bar-mid" id="nowLabel"></div>
+        <div class="bar-right">
+          <button id="muteBtn" class="icon-btn" aria-label="Mute">
+            <svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 9.5h4l5-4v13l-5-4H4Z" fill="currentColor"/><path class="waves" d="M16.2 8.4a5 5 0 0 1 0 7.2M18.8 6a8.4 8.4 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path class="mute-x" d="m16.5 9 5 6M21.5 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button id="fsBtn" class="icon-btn" aria-label="Fullscreen">
+            <svg viewBox="0 0 24 24" width="21" height="21"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="hint" class="hint">space play · ← → seek · f fullscreen · s scene</div>
+  </div>
+  <div id="loading" class="loading"><div class="spinner"></div><span>Preparing the reel…</span></div>
+  <div id="error" class="error" hidden></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

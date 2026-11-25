@@ -1,0 +1,171 @@
+VISUAL GUIDE
+Video: Vision AI Just Deleted Its Most Expensive Component
+Source paper: "Unbundling Multimodal Vision Encoding" (Brown, Hoang et al., Meta FAIR and NYU, arXiv 2611.17334, Nov 12, 2026)
+
+HOW TO USE
+Each cue gives an approximate time, the narration line where the visual should land, and what to show. Times are estimates at 150 words per minute, so re-time them against the final voiceover. Cues marked NEW were added beyond the original visual notes. Everything else comes straight from the script.
+
+THROUGH-LINE (use in every test)
+A three-icon graphic: [brain with a long history = visual prior], [desk = dedicated vision capacity], [room before the team = pre-fusion placement]. Introduce it in Part 2 and reuse it in every test so viewers always know which part is being tested.
+  Test one: "prior" icon highlighted, the other two greyed.
+  Test two: "capacity" icon highlighted, "prior" crossed out from test one.
+  Test three (NEW): "room" icon highlighted, with the desk moving out of its separate room into the main office.
+
+------------------------------------------------------------
+HOOK (0:00 to 0:40)
+------------------------------------------------------------
+
+1. 0:00 | Line: "There's a part inside almost every AI that can see."
+   Cold open on a photo slicing into a grid. A glowing box labeled "vision encoder" appears with a price tag. When the narration says "ten trillion image tokens," a big number slams on screen: 10 trillion.
+
+------------------------------------------------------------
+INTRO (0:40 to 2:30)
+------------------------------------------------------------
+
+2. 0:45 | Line: "Say you want to build an AI that can look at a picture..."
+   Simple diagram: [image network] -> [language model], labeled "the default."
+   At "But lately, a few labs broke the pattern," three arrows split off to three recipe cards: pretrained encoder, from-scratch encoder, encoder-free.
+
+------------------------------------------------------------
+PART 1: How a model sees (2:30 to 6:00)
+------------------------------------------------------------
+
+3. 3:20 | Lines: "Cut the image into small squares..." through "That's a vision-language model. The whole thing."
+   Animate a photo slicing into a 16 by 16 grid. One square zooms out to "14 x 14 x 3 = 588 numbers," slides through a box labeled "one matrix multiply," and becomes a colored vector that lines up next to text-token vectors.
+   Spend time here. Everything later builds on this animation.
+
+4. 5:00 | Line: "Engineers call those squares patches."
+   NEW: Show the words "patches," "patch embedding" and "encoder-free" as on-screen labels at the moment each is named.
+
+------------------------------------------------------------
+PART 2: The specialist and his three gifts (6:00 to 9:15)
+------------------------------------------------------------
+
+5. 7:15 | Lines: "One. What he learned before he ever met your team." / "Two. His own desk." / "Three. Where he sits."
+   Three-icon graphic: [brain with a long history = prior], [desk = capacity], [room before the team = pre-fusion]. Reveal one icon per spoken number.
+
+6. 8:15 | Line: "A pretrained encoder has all three."
+   Three-row check table.
+     Pretrained encoder: yes, yes, yes
+     Scratch encoder: no, yes, yes
+     Encoder-free: no, no, no
+
+7. 8:40 | Line: "Remember the number from the start. Ten trillion image tokens for SigLIP two."
+   NEW: Bring back the big "10 trillion" number from the opening, next to the "prior" icon.
+
+------------------------------------------------------------
+PART 3: The fair fight (9:15 to 12:00)
+------------------------------------------------------------
+
+8. 10:00 | Line: "So the paper uses one number. Lifetime compute."
+   "Fair fight" graphic. Four lanes, one per recipe, each with a budget bar split into stages (language pretraining, encoder pretraining, multimodal training). The pretrained lane has a big chunk sitting before the starting line. Then the chunk slides inside the bar to show it now counts.
+
+9. 11:00 | Line: "Four recipes: the pretrained encoder, the from-scratch encoder, encoder-free..."
+   NEW: Show the four recipe cards side by side. The fourth card is locked or blurred with a label "saved for later."
+
+------------------------------------------------------------
+PART 4: Test one. Can you fire the training? (12:00 to 16:00)
+------------------------------------------------------------
+
+10. 12:30 | Line: "Does the vision encoder need training of its own, before it meets the language model?"
+    Reuse the three-icon graphic with the "prior" icon highlighted, everything else greyed.
+
+11. 13:30 | Line: "When pretraining used a small slice of the budget, up to fifteen percent, every pretrained encoder tied..."
+    Line chart. X axis: share of budget spent on encoder pretraining. Flat line for the from-scratch encoder. Pretrained line sits on it at 7% and 15%, then drops at 60%.
+
+12. 14:30 | Line: "On a standard image recognition test, its accuracy went from eighty point four percent to eighty-four point four percent."
+    NEW: Two panels. Left: recognition accuracy bar rising from 80.4% to 84.4%. Right: image-question score, flat. The mismatch is the point.
+
+------------------------------------------------------------
+PART 5: Test two. Can you fire the desk? (16:00 to 19:45)
+------------------------------------------------------------
+
+13. 16:30 | Line: "The question: does a model need a desk that only image tokens use?"
+    Three-icon graphic with "capacity" highlighted and "prior" already crossed out from test one.
+    Contrast is the point: the thing we cut was fine, the thing we're about to cut is not.
+
+14. 17:00 | Line: "Encoder-free lost."
+    Side-by-side bars.
+      Overall image score: 44.4 vs 39.0
+      Text-and-chart score: 38.2 vs 25.2
+      Language bars nearly equal
+
+15. 19:00 | Line: "You can see the same story in the real world."
+    NEW: Name card. Inkling (encoder-free) -> Inkling 2 Small (292M-parameter vision encoder). Cite the paper, Section 7.
+
+------------------------------------------------------------
+PART 6: Test three. Can the desk move inside? (19:45 to 25:00)
+------------------------------------------------------------
+
+16. 20:30 | Line: "Remember the expert's desk? Instead of a separate room, put the desk inside the main office."
+    NEW: Animate the desk icon sliding out of its separate room and into the main office with the writers.
+
+17. 21:15 | Lines: "For an image token, the layer's output is the shared output, plus the output of this extra desk..." and "One extra term, with a light switch."
+    On-screen equation: h' = h + F(h) + m * dF(h)
+    Labels: F = "shared FFN, everyone uses it." dF = "vision-only FFN." m = "1 for image tokens, 0 for text."
+    Animate a text token skipping the extra branch and an image token flowing through both.
+    (Simplified from the paper: the normalization step is left out.)
+
+18. 22:30 | Line: "Now, pause the video and guess."
+    A 28-layer stack drawn as a building with 28 floors, raw pixels walking in on floor one. Show the four placement options: a thin slice on every floor, eight floors spread out, the top eight, the bottom eight. Five-second countdown, then reveal the bars.
+    NEW detail for the reveal:
+      Thin slice on every floor: 39.4
+      Spread out: 37.6
+      Top eight: 35.1
+      Bottom eight: 45.0
+      Reference lines: encoder-free 39.0, from-scratch encoder 44.4
+    The wording "floors" matches the updated narration.
+
+19. 23:20 | Line: "Second check. Does it have to be vision-only?"
+    NEW: Three bars. Making the shared network bigger: 40.1. A separate desk used by everyone: 42.3. A desk for image tokens only: 45.0.
+
+20. 24:30 | Line: "On to speed."
+    Two timelines.
+      Top: request -> [encoder] -> [backbone] -> first token.
+      Bottom: request -> [backbone with early vision-only layers] -> first token.
+    The bottom bar is visibly shorter.
+
+------------------------------------------------------------
+PART 7: What it doesn't prove, and what to do (25:00 to 27:15)
+------------------------------------------------------------
+
+21. 25:30 | Lines: "One." / "Two." / "Three." / "Four."
+    NEW: Show each limit as a one-line card as it is spoken.
+      1. Encoders saw the same images as everything else
+      2. Dense models only, up to 6.4B
+      3. Small training images, 224 x 224
+      4. Data mix tuned on the scratch encoder at 1.7B
+
+22. 26:30 | Line: "But if you're designing a model, this gives you four rules."
+    NEW: Show the four rules as one-line cards, same style as the limits.
+      1. Skip the separate pretraining stage, start images at update one
+      2. Spend the dropped encoder's parameters as vision-only weights in the first layers
+      3. Judge encoders on reading text and charts, not recognition scores
+      4. Measure time to first token with your own request mix
+
+------------------------------------------------------------
+CALL TO ACTION (27:15 to 28:00)
+------------------------------------------------------------
+
+23. 27:30 | Line: "In this next video, I break down..."
+    End screen with your real next video. The narration line is a placeholder, so swap the topic. One call to action only.
+
+------------------------------------------------------------
+NUMBERS TO PUT ON SCREEN (all from the paper)
+------------------------------------------------------------
+
+- SigLIP 2: 40B image and text samples, about 10 trillion image tokens (Section 2.3).
+- Image setup: 224 x 224, 14 x 14 patches, 256 tokens. 14 x 14 x 3 = 588 numbers per patch (Section 2.1).
+- Test one: pretraining at 7.4% or 15% of the budget ties the scratch encoder. At 60% it falls below (Section 3, Figure 2a).
+- Free pretraining: ImageNet probe 80.4% to 84.4%, image-question score highest after the shortest pretraining (Section 6.1).
+- Late vision: image score 42.5 when images start at update one, about 35 when they start at 25%, 50% or 75% (Appendix A.4, Table 11).
+- Test two (Table 2): scratch encoder 44.4, encoder-free 39.0, wider 38.6, deeper 38.7, both 38.8. Text-and-chart: 38.2 vs 25.2. Two-layer projection 40.5, hierarchical MLP 35.9.
+- Scaling: encoder-free needs about 3x the compute to match the encoder, from 0.6B to 6.4B (Section 5.4).
+- Test three (Table 3): every layer 39.4, spread 37.6, last eight 35.1, first eight 45.0. All-token controls: 40.1 and 42.3.
+- Midtraining: 1.7B model, 1T text tokens, then 1.33T token-equivalents. Full MoT has 3.5x the vision-only parameters and still falls behind (Section 6.2).
+- Speed: one H200, 16 concurrent requests, one 448-pixel image and 256 text tokens each. Encoder recipe about 3% slower to train at 4B (Section 6.3).
+- Inkling to Inkling 2 Small: 292M-parameter vision encoder (Section 7).
+- Limits: same-data encoders, dense models up to 6.4B, 224 px training, mixture tuned on the scratch encoder (Section 8).
+
+CITE ON SCREEN
+Cite the paper itself, not secondary coverage: arXiv 2611.17334.
