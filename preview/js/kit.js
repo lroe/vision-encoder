@@ -1029,40 +1029,52 @@ export function drawGrain(ctx, alpha = 0.5) {
 }
 
 let bgCache = null;
+let bgCacheW = 0;
+let bgCacheH = 0;
 
-function buildBg() {
+// Build the backdrop at the canvas's real pixel size. A 1080p cache stretched
+// to 2K/4K turns the grain into soft blobs and gives YouTube's encoder an
+// easy target for blocking. Grain is generated 1:1 with output pixels.
+function buildBg(pxW, pxH) {
   const c = document.createElement('canvas');
-  c.width = W;
-  c.height = H;
+  c.width = pxW;
+  c.height = pxH;
   const g = c.getContext('2d');
   g.fillStyle = C.bg;
-  g.fillRect(0, 0, W, H);
-  const glow = g.createRadialGradient(W / 2, H * 0.44, H * 0.1, W / 2, H / 2, H * 0.95);
-  glow.addColorStop(0, 'rgba(255,255,255,0.028)');
-  glow.addColorStop(0.5, 'rgba(255,255,255,0.008)');
-  glow.addColorStop(1, 'rgba(0,0,0,0.20)');
-  g.fillStyle = glow;
-  g.fillRect(0, 0, W, H);
-  if (!grainCanvas) makeGrain();
-  const pat = g.createPattern(grainCanvas, 'repeat');
+  g.fillRect(0, 0, pxW, pxH);
+
+  const noise = document.createElement('canvas');
+  noise.width = pxW;
+  noise.height = pxH;
+  const ng = noise.getContext('2d');
+  const img = ng.createImageData(pxW, pxH);
+  const data = img.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const v = Math.random() * 255;
+    data[i] = v;
+    data[i + 1] = v;
+    data[i + 2] = v;
+    data[i + 3] = Math.random() * 22;
+  }
+  ng.putImageData(img, 0, 0);
+
   g.globalAlpha = 0.22;
-  g.fillStyle = pat;
-  g.fillRect(0, 0, W, H);
+  g.drawImage(noise, 0, 0);
   g.globalAlpha = 1;
-  const vig = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
-  vig.addColorStop(0, 'rgba(0,0,0,0)');
-  vig.addColorStop(1, 'rgba(0,0,0,0.28)');
-  g.fillStyle = vig;
-  g.fillRect(0, 0, W, H);
+
   bgCache = c;
+  bgCacheW = pxW;
+  bgCacheH = pxH;
 }
 
 export function backdrop(ctx) {
-  if (!bgCache) buildBg();
+  const pxW = ctx.canvas.width;
+  const pxH = ctx.canvas.height;
+  if (!bgCache || bgCacheW !== pxW || bgCacheH !== pxH) buildBg(pxW, pxH);
   ctx.drawImage(bgCache, 0, 0, W, H);
 }
 
-// The vignette is baked into the backdrop so the compositor does not pay for
-// a full-screen radial gradient every frame.
+// The backdrop is already a flat background plus native-resolution grain.
+// No radial glow or vignette: large dark gradients band badly on YouTube.
 export function vignette() {}
 
