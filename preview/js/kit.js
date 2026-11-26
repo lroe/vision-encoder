@@ -997,84 +997,15 @@ export function brace(ctx, x1, x2, y, o = {}) {
   });
 }
 
-// ---- texture --------------------------------------------------------------
+// ---- background ------------------------------------------------------------
 
-let grainCanvas = null;
-export function makeGrain() {
-  const c = document.createElement('canvas');
-  c.width = 360;
-  c.height = 360;
-  const g = c.getContext('2d');
-  const img = g.createImageData(c.width, c.height);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = Math.random() * 255;
-    img.data[i] = v;
-    img.data[i + 1] = v;
-    img.data[i + 2] = v;
-    img.data[i + 3] = Math.random() * 22;
-  }
-  g.putImageData(img, 0, 0);
-  grainCanvas = c;
-  return c;
-}
-
-export function drawGrain(ctx, alpha = 0.5) {
-  if (!grainCanvas) makeGrain();
-  const pat = ctx.createPattern(grainCanvas, 'repeat');
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = pat;
-  ctx.fillRect(0, 0, W, H);
-  ctx.restore();
-}
-
-let bgCache = null;
-let bgCacheW = 0;
-let bgCacheH = 0;
-
-// Build the backdrop at the canvas's real pixel size. A 1080p cache stretched
-// to 2K/4K turns the grain into soft blobs and gives YouTube's encoder an
-// easy target for blocking. Grain is generated 1:1 with output pixels.
-function buildBg(pxW, pxH) {
-  const c = document.createElement('canvas');
-  c.width = pxW;
-  c.height = pxH;
-  const g = c.getContext('2d');
-  g.fillStyle = C.bg;
-  g.fillRect(0, 0, pxW, pxH);
-
-  const noise = document.createElement('canvas');
-  noise.width = pxW;
-  noise.height = pxH;
-  const ng = noise.getContext('2d');
-  const img = ng.createImageData(pxW, pxH);
-  const data = img.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const v = Math.random() * 255;
-    data[i] = v;
-    data[i + 1] = v;
-    data[i + 2] = v;
-    data[i + 3] = Math.random() * 22;
-  }
-  ng.putImageData(img, 0, 0);
-
-  g.globalAlpha = 0.22;
-  g.drawImage(noise, 0, 0);
-  g.globalAlpha = 1;
-
-  bgCache = c;
-  bgCacheW = pxW;
-  bgCacheH = pxH;
-}
-
+// Flat Dracula background only. No grain, no vignette, no radial glow.
+// YouTube's encoder turns fine noise into blocky speckle, so keep the
+// background a single clean color and let the foreground carry the detail.
 export function backdrop(ctx) {
-  const pxW = ctx.canvas.width;
-  const pxH = ctx.canvas.height;
-  if (!bgCache || bgCacheW !== pxW || bgCacheH !== pxH) buildBg(pxW, pxH);
-  ctx.drawImage(bgCache, 0, 0, W, H);
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(0, 0, W, H);
 }
 
-// The backdrop is already a flat background plus native-resolution grain.
-// No radial glow or vignette: large dark gradients band badly on YouTube.
 export function vignette() {}
 

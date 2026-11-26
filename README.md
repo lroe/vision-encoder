@@ -47,7 +47,7 @@ http://localhost:4173/preview/?capture=1&t=153&scale=2
 
 ## How it is made
 
-- `preview/js/kit.js` — canvas drawing kit: typography, line work, icons, charts, photo mosaic, grain
+- `preview/js/kit.js` — canvas drawing kit: typography, line work, icons, charts, photo mosaic
 - `preview/js/scenes/*.js` — 54 timed scenes across the full narration
 - `preview/js/data/timeline.js` — generated word-level timings
 - `whisper_words.json` — faster-whisper output for the supplied `audio.wav`
